@@ -1,0 +1,52 @@
+# Grafana datasources configuration
+apiVersion: 1
+
+datasources:
+  # Prometheus datasource for metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "5s"
+      queryTimeout: "60s"
+      httpMethod: "POST"
+    secureJsonData: {}
+
+  # PostgreSQL datasource for trading data
+  - name: PostgreSQL-Trading
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: trading_db
+    user: trading_user
+    secureJsonData:
+      password: trading_password
+    jsonData:
+      sslmode: "disable"
+      maxOpenConns: 10
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    editable: true
+
+  # TimescaleDB datasource for time-series data
+  - name: TimescaleDB
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    database: trading_timescale
+    user: timescale_user
+    secureJsonData:
+      password: timescale_password
+    jsonData:
+      sslmode: "disable"
+      maxOpenConns: 10
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: true
+    editable: true

@@ -1,0 +1,89 @@
+# Development Configuration
+environment: development
+debug: true
+
+# Database Configuration
+database:
+  url: "postgresql://trading_user:trading_password@localhost:5432/trading_db"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+
+timescale_database:
+  url: "postgresql://timescale_user:timescale_password@localhost:5433/trading_timescale"
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+
+# Kafka Configuration
+kafka:
+  bootstrap_servers: "localhost:9092"
+  group_id: "trading-system-dev"
+  auto_offset_reset: "earliest"
+  enable_auto_commit: true
+  session_timeout_ms: 30000
+  request_timeout_ms: 40000
+
+# Redis Configuration
+redis:
+  url: "redis://localhost:6379/0"
+  max_connections: 10
+  retry_on_timeout: true
+
+# Trading Configuration
+trading:
+  symbols: ["EURUSD", "XAUUSD", "US30"]
+  timeframes: ["1m", "1H", "4H", "1D"]
+  risk_per_trade: 0.01  # 1% risk for development
+  max_drawdown: 0.10    # 10% max drawdown
+  max_positions: 3      # Limited positions for dev
+
+# Strategy Configuration
+strategy:
+  name: "SessionTrendContinuation"
+  d1_ema_fast: 50
+  d1_ema_slow: 200
+  h4_ema_fast: 20
+  h4_ema_slow: 50
+  adx_period: 14
+  adx_threshold: 25.0
+  atr_period: 14
+  atr_multiplier: 2.0
+
+# Session Configuration
+sessions:
+  timezone: "UTC"
+  asian_start: "21:00"
+  asian_end: "06:00"
+  european_start: "06:00"
+  european_end: "16:00"
+  us_start: "13:00"
+  us_end: "22:00"
+
+# Monitoring Configuration
+monitoring:
+  prometheus_port: 9090
+  grafana_port: 3000
+  metrics_interval: 60
+  log_level: "DEBUG"
+
+# Backtesting Configuration
+backtest:
+  start_date: "2023-01-01"
+  end_date: "2023-12-31"
+  initial_capital: 10000
+  transaction_cost: 0.0001
+  slippage: 0.0001
+
+# Data Sources
+data_sources:
+  primary: "mt5"
+  backup: "alpha_vantage"
+  historical_provider: "mt5"
+
+# Logging Configuration
+logging:
+  level: "DEBUG"
+  format: "json"
+  file_rotation: "daily"
+  retention_days: 7

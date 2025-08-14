@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bump2version
+
+    - name: Configure git
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Bump version
+      run: |
+        bump2version ${{ github.event.inputs.release_type }}
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get the latest tag
+        LATEST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+
+        if [ -z "$LATEST_TAG" ]; then
+          # First release
+          CHANGELOG=$(git log --pretty=format:"- %s" --no-merges)
+        else
+          # Incremental changelog
+          CHANGELOG=$(git log $LATEST_TAG..HEAD --pretty=format:"- %s" --no-merges)
+        fi
+
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Push changes
+      run: |
+        git push origin main --tags
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.version }}
+        release_name: Release ${{ github.event.inputs.version }}
+        body: |
+          ## Changes in this Release
+
+          ${{ steps.changelog.outputs.CHANGELOG }}
+
+          ## Installation
+
+          ```bash
+          git clone https://github.com/${{ github.repository }}.git
+          cd trading-system-project
+          git checkout ${{ github.event.inputs.version }}
+          make setup
+          ```
+
+          ## Docker
+
+          ```bash
+          docker pull ${{ secrets.DOCKER_USERNAME }}/trading-system:${{ github.event.inputs.version }}
+          ```
+
+          ## Documentation
+
+          Full documentation is available in the [README](https://github.com/${{ github.repository }}/blob/${{ github.event.inputs.version }}/README.md).
+        draft: false
+        prerelease: false

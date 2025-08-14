@@ -1,0 +1,153 @@
+# Prometheus alerting rules for Trading System
+groups:
+  - name: trading_system_alerts
+    rules:
+      # System Health Alerts
+      - alert: TradingSystemDown
+        expr: up{job="trading-system"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: trading-system
+        annotations:
+          summary: "Trading System is down"
+          description: "Trading System has been down for more than 30 seconds"
+
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes{job="trading-system"} / 1024 / 1024) > 500
+        for: 2m
+        labels:
+          severity: warning
+          component: trading-system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Trading System memory usage is above 500MB for 2 minutes"
+
+      # Trading Performance Alerts
+      - alert: HighDrawdown
+        expr: trading_account_drawdown_percent > 10
+        for: 1m
+        labels:
+          severity: critical
+          component: risk-management
+        annotations:
+          summary: "High drawdown detected"
+          description: "Account drawdown is above 10%: {{ $value }}%"
+
+      - alert: DailyLossLimit
+        expr: trading_daily_pnl < -1000
+        for: 1m
+        labels:
+          severity: critical
+          component: risk-management
+        annotations:
+          summary: "Daily loss limit exceeded"
+          description: "Daily P&L is below -$1000: ${{ $value }}"
+
+      - alert: NoTradingSignals
+        expr: increase(trading_signals_generated_total[1h]) == 0
+        for: 1h
+        labels:
+          severity: warning
+          component: strategy
+        annotations:
+          summary: "No trading signals generated"
+          description: "No trading signals have been generated in the last hour"
+
+      # Data Quality Alerts
+      - alert: MarketDataStale
+        expr: (time() - trading_last_market_data_timestamp) > 300
+        for: 1m
+        labels:
+          severity: warning
+          component: data-feed
+        annotations:
+          summary: "Market data is stale"
+          description: "No market data received for more than 5 minutes"
+
+      - alert: HighSpread
+        expr: trading_current_spread > 5
+        for: 2m
+        labels:
+          severity: warning
+          component: market-conditions
+        annotations:
+          summary: "High spread detected"
+          description: "Current spread is {{ $value }} pips, above 5 pip threshold"
+
+      # Infrastructure Alerts
+      - alert: KafkaDown
+        expr: up{job="kafka"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: kafka
+        annotations:
+          summary: "Kafka is down"
+          description: "Kafka message broker is not responding"
+
+      - alert: DatabaseConnectionFailed
+        expr: trading_database_connections_failed_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "Database connection failures"
+          description: "Database connection failures detected: {{ $value }}"
+
+      - alert: HighLatency
+        expr: trading_execution_latency_seconds > 1
+        for: 2m
+        labels:
+          severity: warning
+          component: execution
+        annotations:
+          summary: "High execution latency"
+          description: "Order execution latency is above 1 second: {{ $value }}s"
+
+  - name: system_resources
+    rules:
+      # CPU Usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total{job="trading-system"}[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is above 80% for 5 minutes"
+
+      # Disk Space
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 1m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10% on {{ $labels.device }}"
+
+  - name: kafka_alerts
+    rules:
+      - alert: KafkaConsumerLag
+        expr: kafka_consumer_lag_sum > 1000
+        for: 2m
+        labels:
+          severity: warning
+          component: kafka
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: "Kafka consumer lag is above 1000 messages"
+
+      - alert: KafkaTopicPartitionOffline
+        expr: kafka_topic_partition_in_sync_replica < kafka_topic_partition_replica
+        for: 1m
+        labels:
+          severity: critical
+          component: kafka
+        annotations:
+          summary: "Kafka partition offline"
+          description: "Kafka topic {{ $labels.topic }} partition {{ $labels.partition }} has offline replicas"

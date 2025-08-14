@@ -23,7 +23,7 @@ setup(
     description="Production-Grade Session-Based Trend Continuation Trading System",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/your-org/trading-system-project",
+    url="https://github.com/cuongngo1801/trading_system_project",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",

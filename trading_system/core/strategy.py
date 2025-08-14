@@ -8,9 +8,8 @@ across different market sessions using EMA crossovers and ADX filters.
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
 import pandas as pd
 
 from trading_system.utils.config import StrategyConfig
@@ -237,11 +236,12 @@ class TrendContinuationStrategy:
         dm_plus = high.diff()
         dm_minus = -low.diff()
 
-        # Set DM to 0 if not the strongest move
-        dm_plus[dm_plus < dm_minus] = 0
-        dm_plus[dm_plus < 0] = 0
-        dm_minus[dm_minus < dm_plus] = 0
-        dm_minus[dm_minus < 0] = 0
+        # Set DM to 0 if not the strongest move  
+        dm_plus_mask = (dm_plus >= dm_minus) & (dm_plus >= 0)
+        dm_minus_mask = (dm_minus >= dm_plus) & (dm_minus >= 0)
+        
+        dm_plus = dm_plus.where(dm_plus_mask, 0)
+        dm_minus = dm_minus.where(dm_minus_mask, 0)
 
         # Calculate smoothed averages
         atr = tr.rolling(window=period).mean()

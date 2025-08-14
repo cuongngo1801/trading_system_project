@@ -1,13 +1,11 @@
 """Test configuration and fixtures."""
 
-from datetime import datetime, timedelta
-from typing import Any, Dict
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from trading_system.core.strategy import SessionType, TrendDirection
 from trading_system.utils.config import StrategyConfig
 
 
@@ -30,7 +28,9 @@ def strategy_config():
 @pytest.fixture
 def sample_ohlc_data():
     """Create sample OHLC data for testing."""
-    dates = pd.date_range(start="2023-01-01", periods=300, freq="H")
+    dates = pd.date_range(
+        start="2023-01-01", periods=5000, freq="H"
+    )  # Increased from 300
 
     # Generate sample price data with trend
     np.random.seed(42)

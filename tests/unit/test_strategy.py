@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from trading_system.core.strategy import (
     SessionType,
@@ -13,7 +12,6 @@ from trading_system.core.strategy import (
     TrendContinuationStrategy,
     TrendDirection,
 )
-from trading_system.utils.config import StrategyConfig
 
 
 class TestTrendContinuationStrategy:
@@ -35,7 +33,9 @@ class TestTrendContinuationStrategy:
 
         # Create data with clear bullish trend
         df = sample_d1_data.copy()
-        df["close"] = df["close"] * np.linspace(1.0, 1.2, len(df))
+        # Create a strong upward trend that ensures fast EMA > slow EMA
+        base_prices = np.linspace(1.0, 1.5, len(df))  # 50% increase
+        df["close"] = df["close"].iloc[0] * base_prices
 
         trend = strategy._compute_trend_d1(df)
         assert trend == TrendDirection.BULLISH
@@ -46,7 +46,9 @@ class TestTrendContinuationStrategy:
 
         # Create data with clear bearish trend
         df = sample_d1_data.copy()
-        df["close"] = df["close"] * np.linspace(1.2, 1.0, len(df))
+        # Create a strong downward trend that ensures fast EMA < slow EMA
+        base_prices = np.linspace(1.5, 1.0, len(df))  # 33% decrease
+        df["close"] = df["close"].iloc[0] * base_prices
 
         trend = strategy._compute_trend_d1(df)
         assert trend == TrendDirection.BEARISH

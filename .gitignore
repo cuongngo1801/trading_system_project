@@ -49,6 +49,42 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+# Trading System Specific
+logs/*.log
+data/raw/*
+data/processed/*
+data/models/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/models/.gitkeep
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Backups
+*.backup
+*.bak
+
+# Cache
+.cache/
+.mypy_cache/
+
 # Translations
 *.mo
 *.pot
@@ -217,3 +253,4 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 .nfs*
+bandit-report.json

@@ -40,8 +40,8 @@ The system follows a microservices architecture with the following components:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-org/trading-system-project.git
-cd trading-system-project
+git clone https://github.com/cuongngo1801/trading_system_project.git
+cd trading_system_project
 ```
 
 2. Set up environment variables:
@@ -120,12 +120,12 @@ trading-system-project/
 │   ├── execution/            # Live trading
 │   ├── monitoring/           # System monitoring
 │   └── utils/                # Utilities
-├── tests/                    # Test suite
+├── tests/                    # Test suite (unit tests only)
 ├── docker/                   # Docker configurations
 ├── config/                   # Configuration files
-├── notebooks/                # Jupyter notebooks
+├── data/                     # Data storage (raw, processed, models)
+├── logs/                     # Application logs
 ├── scripts/                  # Utility scripts
-├── docs/                     # Documentation
 └── .github/                  # GitHub Actions
 ```
 
@@ -136,8 +136,8 @@ Run the test suite:
 # Unit tests
 make test-unit
 
-# Integration tests
-make test-integration
+# Integration tests (currently disabled)
+# make test-integration
 
 # Full test suite with coverage
 make test-coverage

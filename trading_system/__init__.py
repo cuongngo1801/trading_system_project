@@ -9,11 +9,7 @@ __author__ = "Trading Team"
 __description__ = "Production-Grade Session-Based Trend Continuation Trading System"
 
 # Core strategy components (Phase 1 - Available)
-from .core.strategy import (
-    SessionType,
-    TrendDirection,
-    TrendContinuationStrategy,
-)
+from .core.strategy import SessionType, TrendContinuationStrategy, TrendDirection
 
 # Current exports (Phase 1)
 __all__ = [

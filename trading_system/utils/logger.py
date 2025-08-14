@@ -1,13 +1,15 @@
 """Structured logging configuration for trading system."""
 
 import logging
+import logging.handlers
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import structlog
+from structlog.typing import Processor
 
 
 def configure_logging(
@@ -32,7 +34,7 @@ def configure_logging(
 
     # Configure processors based on format type
     if format_type.lower() == "json":
-        processors = [
+        processors: List[Processor] = [
             structlog.stdlib.filter_by_level,
             structlog.stdlib.add_logger_name,
             structlog.stdlib.add_log_level,
@@ -62,7 +64,7 @@ def configure_logging(
     )
 
     # Configure standard library logging
-    handlers = [logging.StreamHandler(sys.stdout)]
+    handlers: List[logging.Handler] = [logging.StreamHandler(sys.stdout)]
 
     if log_file:
         # Ensure log directory exists
@@ -100,7 +102,7 @@ class TradingLogger:
             }
         )
 
-    def with_context(self, **kwargs) -> "TradingLogger":
+    def with_context(self, **kwargs: Any) -> "TradingLogger":
         """Add context to logger.
 
         Args:
@@ -112,27 +114,27 @@ class TradingLogger:
         new_context = {**self.context, **kwargs}
         return TradingLogger(self.logger._context.get("logger", "trading"), new_context)
 
-    def debug(self, message: str, **kwargs) -> None:
+    def debug(self, message: str, **kwargs: Any) -> None:
         """Log debug message."""
         self.logger.debug(message, **{**self.context, **kwargs})
 
-    def info(self, message: str, **kwargs) -> None:
+    def info(self, message: str, **kwargs: Any) -> None:
         """Log info message."""
         self.logger.info(message, **{**self.context, **kwargs})
 
-    def warning(self, message: str, **kwargs) -> None:
+    def warning(self, message: str, **kwargs: Any) -> None:
         """Log warning message."""
         self.logger.warning(message, **{**self.context, **kwargs})
 
-    def error(self, message: str, **kwargs) -> None:
+    def error(self, message: str, **kwargs: Any) -> None:
         """Log error message."""
         self.logger.error(message, **{**self.context, **kwargs})
 
-    def critical(self, message: str, **kwargs) -> None:
+    def critical(self, message: str, **kwargs: Any) -> None:
         """Log critical message."""
         self.logger.critical(message, **{**self.context, **kwargs})
 
-    def exception(self, message: str, **kwargs) -> None:
+    def exception(self, message: str, **kwargs: Any) -> None:
         """Log exception with traceback."""
         self.logger.exception(message, **{**self.context, **kwargs})
 
@@ -148,7 +150,9 @@ class PerformanceLogger:
         """
         self.logger = logger.with_context(component="performance")
 
-    def log_execution_time(self, operation: str, duration: float, **kwargs) -> None:
+    def log_execution_time(
+        self, operation: str, duration: float, **kwargs: Any
+    ) -> None:
         """Log operation execution time.
 
         Args:
@@ -171,7 +175,7 @@ class PerformanceLogger:
         quantity: float,
         price: float,
         execution_time: float,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Log trade execution details.
 
@@ -199,7 +203,7 @@ class PerformanceLogger:
         signal_type: str,
         strength: float,
         generation_time: float,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Log signal generation.
 
@@ -232,7 +236,7 @@ class AuditLogger:
         self.logger = logger.with_context(component="audit")
 
     def log_user_action(
-        self, user_id: str, action: str, resource: str, **kwargs
+        self, user_id: str, action: str, resource: str, **kwargs: Any
     ) -> None:
         """Log user action for audit trail.
 

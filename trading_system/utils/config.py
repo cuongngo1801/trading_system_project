@@ -1,7 +1,6 @@
 """Configuration management for trading system."""
 
 import os
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -121,6 +120,8 @@ class Config(BaseSettings):
     )
 
     class Config:
+        """Pydantic model configuration."""
+
         env_file = ".env"
         env_nested_delimiter = "__"
 
@@ -199,12 +200,14 @@ class ConfigManager:
             self._config_data.setdefault("redis", {})["url"] = os.getenv("REDIS_URL")
 
         # Trading
-        if os.getenv("SYMBOLS"):
-            symbols = os.getenv("SYMBOLS").split(",")
+        symbols_env = os.getenv("SYMBOLS")
+        if symbols_env:
+            symbols = symbols_env.split(",")
             self._config_data.setdefault("trading", {})["symbols"] = symbols
 
-        if os.getenv("TIMEFRAMES"):
-            timeframes = os.getenv("TIMEFRAMES").split(",")
+        timeframes_env = os.getenv("TIMEFRAMES")
+        if timeframes_env:
+            timeframes = timeframes_env.split(",")
             self._config_data.setdefault("trading", {})["timeframes"] = timeframes
 
         # API Keys
@@ -222,12 +225,17 @@ class ConfigManager:
         """Get current configuration."""
         if self._config is None:
             self.load_config()
+        if self._config is None:
+            raise RuntimeError("Failed to load configuration")
         return self._config
 
     def reload_config(self) -> Config:
         """Reload configuration from file."""
         self._config = None
-        return self.load_config()
+        self.load_config()
+        if self._config is None:
+            raise RuntimeError("Failed to reload configuration")
+        return self._config
 
     def get_section(self, section: str) -> Dict[str, Any]:
         """Get configuration section.
@@ -238,7 +246,8 @@ class ConfigManager:
         Returns:
             Configuration section
         """
-        return self._config_data.get(section, {})
+        section_data = self._config_data.get(section, {})
+        return section_data if isinstance(section_data, dict) else {}
 
     def validate_config(self) -> bool:
         """Validate configuration.
